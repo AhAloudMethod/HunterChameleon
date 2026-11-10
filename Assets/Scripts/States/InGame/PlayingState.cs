@@ -19,6 +19,11 @@ public class PlayingState : IState
 
     public void Enter()
     {
+        GameTimer.i?.StartTimer();
+
+        ParameterManager.Instance.ReloadParameter();
+        TimeKeeper.Instance.Initialize();
+
         if (!appleSpawner) { appleSpawner = Object.FindObjectOfType<AppleSpawner>(true); }
         if (!goldAppleSpawner) { goldAppleSpawner = Object.FindObjectOfType<GoldAppleSpawner>(true); }
         if (!poisonAppleSpawner) { poisonAppleSpawner = Object.FindObjectOfType<PoisonAppleSpawner>(true); }

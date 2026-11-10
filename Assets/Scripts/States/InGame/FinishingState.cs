@@ -10,6 +10,8 @@ public class FinishingState : IState
 
     public void Enter()
     {
+        GameTimer.i?.StopTimer();
+
         if (!finishController) { finishController = Object.FindObjectOfType<FinishController>(true); }
 
         // FinishTextを表示させる
