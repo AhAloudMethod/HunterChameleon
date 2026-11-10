@@ -135,6 +135,13 @@ public sealed class ParamLogger : MonoBehaviour
         }
 
         isTrialInProgress = false;
+#if !UNITY_WEBGL || UNITY_EDITOR
+        if (s1 > s0 || p1 > p0)
+        {
+            ExporterStandard.AutoSave(streamCache, snapshotCache,
+                new[] { (s0, s1, p0, p1) });
+        }
+#endif
         Debug.Log($"[ParamLogger] 試行を終了しました。({committedTrials.Count} 試行完了)");
     }
 

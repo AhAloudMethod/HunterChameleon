@@ -12,6 +12,23 @@ using UnityEngine;
 /// </summary>
 public static class ExporterStandard
 {
+    // Complete the save before retrying can change the cached rows.
+    public static void AutoSave(
+        LogItemCache streamCache, LogItemCache snapshotCache,
+        IReadOnlyList<(int s0, int s1, int p0, int p1)> trials)
+    {
+        string baseDirName = Path.Combine("PlayLogs",
+            "log_" + DateTime.Now.ToString("yyyyMMdd_HHmmss_fff") + "_" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            ExportLogic(streamCache, snapshotCache, trials, baseDirName, Application.persistentDataPath);
+        }
+        catch (Exception exception)
+        {
+            Debug.LogError("[ExporterStandard] Automatic log save failed: " + exception);
+        }
+    }
+
     public static void Export(
         LogItemCache streamCache, LogItemCache snapshotCache,
         IReadOnlyList<(int s0, int s1, int p0, int p1)> trials,
