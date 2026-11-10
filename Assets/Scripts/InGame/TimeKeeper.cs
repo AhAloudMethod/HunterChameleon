@@ -27,11 +27,17 @@ public class TimeKeeper : MonoBehaviour
 
     private void Start()
     {
-        // パラメータをセット
         parameter = ParameterManager.Instance.parameter.inGame;
+        Initialize();
+    }
 
+    public void Initialize()
+    {
+        parameter = ParameterManager.Instance.parameter.inGame;
         playTime = parameter.playTime;
         alartRemainingTime = Mathf.Min(parameter.alartRemainingTime, playTime);
+        time = 0f;
+        prevTime = -1.0f;
     }
 
     private void OnDestroy()

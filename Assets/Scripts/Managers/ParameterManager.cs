@@ -20,8 +20,8 @@ public class ParameterManager : MonoBehaviour
             defaultPath = Path.Combine(Application.streamingAssetsPath, "GameParameter.json");
             writePath = Path.Combine(Application.persistentDataPath, "GameParameter.json");
 
-            SaveParameter();
             LoadParameter();
+            SaveParameter();
 
             Instance = this;
             DontDestroyOnLoad(gameObject);
@@ -39,10 +39,19 @@ public class ParameterManager : MonoBehaviour
     {
         // 既存ファイルがあればwritePathを使い、なければdefaultPathを使う
         string path = File.Exists(writePath) ? writePath : defaultPath;
-
         // JSONを読み込み、デシリアライズする
         string json = File.ReadAllText(path);
-        parameter = JsonUtility.FromJson<GameParameter>(json);
+        if (parameter == null)
+            parameter = JsonUtility.FromJson<GameParameter>(json);
+        else
+            JsonUtility.FromJsonOverwrite(json, parameter);
+    }
+
+    public void ReloadParameter()
+    {
+        string json = File.ReadAllText(defaultPath);
+        JsonUtility.FromJsonOverwrite(json, parameter);
+        SaveParameter();
     }
 
     public void SaveParameter()
