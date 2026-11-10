@@ -14,14 +14,23 @@ public static class ExporterStandard
 {
     // Complete the save before retrying can change the cached rows.
     public static void AutoSave(
+        string runId,
         LogItemCache streamCache, LogItemCache snapshotCache,
         IReadOnlyList<(int s0, int s1, int p0, int p1)> trials)
     {
-        string baseDirName = Path.Combine("PlayLogs",
-            "log_" + DateTime.Now.ToString("yyyyMMdd_HHmmss_fff") + "_" + Guid.NewGuid().ToString("N"));
+        string baseDirName = Path.Combine("PlayLogs", "run_" + runId);
         try
         {
-            ExportLogic(streamCache, snapshotCache, trials, baseDirName, Application.persistentDataPath);
+            string folder = Path.Combine(Application.persistentDataPath, baseDirName);
+            Directory.CreateDirectory(folder);
+            string basePrefix = DateTime.Now.ToString("yyyyMMdd_HHmmss_fff", System.Globalization.CultureInfo.InvariantCulture);
+            string filePrefix = basePrefix;
+            int suffix = 1;
+            while (Directory.GetFiles(folder, filePrefix + "*").Length > 0)
+            {
+                filePrefix = basePrefix + "_" + suffix++;
+            }
+            ExportLogic(streamCache, snapshotCache, trials, baseDirName, Application.persistentDataPath, filePrefix);
         }
         catch (Exception exception)
         {
@@ -58,7 +67,7 @@ public static class ExporterStandard
     private static void ExportLogic(
         LogItemCache streamCache, LogItemCache snapshotCache,
         IReadOnlyList<(int s0, int s1, int p0, int p1)> trials,
-        string baseDirName, string savePathBase)
+        string baseDirName, string savePathBase, string filePrefix = null)
     {
         var files = new List<LogExporter.FileInMemory>();
         var allSnapshotRows = new List<object[]>();
@@ -80,7 +89,9 @@ public static class ExporterStandard
                 if (rows.Count > 0)
                 {
                     byte[] content = LogCsvGenerator.CreateCSVContent(header, rows);
-                    string path = $"{baseDirName}/stream_trial{trialId}.csv";
+                    string path = filePrefix == null
+                        ? $"{baseDirName}/stream_trial{trialId}.csv"
+                        : $"{baseDirName}/{filePrefix}_player_progress{(trials.Count > 1 ? "_trial" + trialId : "")}.csv";
                     files.Add(new LogExporter.FileInMemory { Path = path, Content = content });
                 }
             }
@@ -97,7 +108,9 @@ public static class ExporterStandard
         {
             var (finalHeader, finalRows) = LogCsvGenerator.FilterActiveColumns(rawSnapshotHeader, allSnapshotRows);
             byte[] content = LogCsvGenerator.CreateCSVContent(finalHeader, finalRows);
-            string path = $"{baseDirName}/snapshot.csv";
+            string path = filePrefix == null
+                ? $"{baseDirName}/snapshot.csv"
+                : $"{baseDirName}/{filePrefix}.csv";
             files.Add(new LogExporter.FileInMemory { Path = path, Content = content });
         }
 

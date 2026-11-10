@@ -23,6 +23,7 @@ public sealed class ParamLogger : MonoBehaviour
 
     // 試行管理用
     private bool isTrialInProgress = false; // 「試行中か」を管理する
+    private string runId;
     private int streamBookmark = 0; // 現在の試行の Stream データ開始インデックス
     private int snapshotBookmark = 0; // 現在の試行の Snapshot データ開始インデックス
 
@@ -93,6 +94,8 @@ public sealed class ParamLogger : MonoBehaviour
     {
         if (isTrialInProgress) { return; }
 
+        runId = System.Guid.NewGuid().ToString("N");
+
         // 1. レジストリをリフレッシュし、現在のシーンのオブジェクトをスキャン
         RefreshRegistry();
 
@@ -138,7 +141,7 @@ public sealed class ParamLogger : MonoBehaviour
 #if !UNITY_WEBGL || UNITY_EDITOR
         if (s1 > s0 || p1 > p0)
         {
-            ExporterStandard.AutoSave(streamCache, snapshotCache,
+            ExporterStandard.AutoSave(runId, streamCache, snapshotCache,
                 new[] { (s0, s1, p0, p1) });
         }
 #endif
