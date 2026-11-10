@@ -11,7 +11,7 @@ public class ChameleonParameter
     );
 
     [Header("Tongue Hit Radius")]
-    public float hitRadiusMultiplier = 1.50f; // 見た目を基準とした当たり判定の大きさの倍率
+    public float hitRadiusMultiplier = 2.50f; // 見た目を基準とした当たり判定の大きさの倍率
 
     [Header("Tongue Sizes")]
     public float rootWidth = 0.60f;  // 根元の幅（ワールド単位）
