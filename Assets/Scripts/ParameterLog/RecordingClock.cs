@@ -9,6 +9,7 @@ public sealed class RecordingClock
     private double elapsedSeconds;
     private int elapsedFrames;
 
+    public bool IsAdvancing => isTrialActive && !isPaused;
     public double ElapsedSeconds => elapsedSeconds;
     public int ElapsedFrames => elapsedFrames;
 

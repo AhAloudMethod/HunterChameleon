@@ -17,6 +17,7 @@ public sealed class ParamLogger : MonoBehaviour
 
     private StreamLogger streamLogger;
     private SnapshotLogger snapshotLogger;
+    private InputTrialRecorder inputRecorder;
 
     [SerializeField] private List<LogItemOrderOverride> streamOrderOverrides = new();
     [SerializeField] private List<LogItemOrderOverride> snapshotOrderOverrides = new();
@@ -63,6 +64,7 @@ public sealed class ParamLogger : MonoBehaviour
 
         // Stream記録中であればデータを記録する（isStreaming, isPaused のチェックは streamLogger 内部で行う）
         streamLogger?.TickStream(clock.ElapsedSeconds, clock.ElapsedFrames);
+        inputRecorder?.Tick(clock.ElapsedSeconds, clock.IsAdvancing);
     }
 
     private void OnDisable()
@@ -72,8 +74,14 @@ public sealed class ParamLogger : MonoBehaviour
         clock.Pause();
     }
 
+    private void OnApplicationQuit()
+    {
+        inputRecorder?.End(clock.ElapsedSeconds, clock.IsAdvancing);
+    }
+
     private void OnDestroy()
     {
+        inputRecorder?.End(clock.ElapsedSeconds, clock.IsAdvancing);
         if (Instance == this)
         {
             Instance = null;
@@ -110,6 +118,9 @@ public sealed class ParamLogger : MonoBehaviour
         // 4. 時計をリセットして開始
         clock.Start();
 
+        inputRecorder = new InputTrialRecorder(System.IO.Path.Combine(Application.persistentDataPath,
+            "PlayLogs", "run_" + runId, "input_trial1.csv"), 1, clock.ElapsedSeconds);
+
         isTrialInProgress = true;
         Debug.Log("[ParamLogger] 試行を開始しました。");
     }
@@ -124,6 +135,7 @@ public sealed class ParamLogger : MonoBehaviour
 
         // 進行中のStream記録と時計を停止
         streamLogger.StopStream();
+        inputRecorder?.End(clock.ElapsedSeconds, clock.IsAdvancing);
         clock.Stop();
 
         // この試行で記録された範囲を確定
@@ -184,6 +196,7 @@ public sealed class ParamLogger : MonoBehaviour
         if (!isTrialInProgress) { return; }
 
         streamLogger.StopStream();
+        inputRecorder?.End(clock.ElapsedSeconds, clock.IsAdvancing);
         clock.Stop();
 
         // ブックマーク地点までキャッシュを巻き戻す
