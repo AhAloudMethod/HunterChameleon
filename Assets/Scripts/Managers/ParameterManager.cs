@@ -49,8 +49,16 @@ public class ParameterManager : MonoBehaviour
 
     public void ReloadParameter()
     {
+        // マウス感度などプレイヤーがSettingsで変更した入力設定は、再読み込みで初期値に戻さない
+        InputParameter input = parameter.input;
+        float sensitivity = input.sensitivity;
+
         string json = File.ReadAllText(defaultPath);
         JsonUtility.FromJsonOverwrite(json, parameter);
+
+        // 入力スクリプトがキャッシュしている参照を維持しつつ、ユーザ設定値を復元する
+        parameter.input = input;
+        parameter.input.sensitivity = sensitivity;
         SaveParameter();
     }
 
