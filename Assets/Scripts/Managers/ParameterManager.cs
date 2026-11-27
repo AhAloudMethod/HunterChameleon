@@ -37,10 +37,9 @@ public class ParameterManager : MonoBehaviour
 
     private void LoadParameter()
     {
-        // 既存ファイルがあればwritePathを使い、なければdefaultPathを使う
-        string path = File.Exists(writePath) ? writePath : defaultPath;
-        // JSONを読み込み、デシリアライズする
-        string json = File.ReadAllText(path);
+        // 起動時は常に初期値(StreamingAssets)から読み込む
+        // マウス感度など前回プレイ時の変更値は、ゲーム再起動で初期値に戻す
+        string json = File.ReadAllText(defaultPath);
         if (parameter == null)
             parameter = JsonUtility.FromJson<GameParameter>(json);
         else
